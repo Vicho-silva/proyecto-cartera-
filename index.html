@@ -1173,9 +1173,7 @@ function openSendModal(assetId,listId){
 }
 
 function trySendViaExtension(asset, clients, list){
-  // Extension ID — user sets this after installing
-  const extId = localStorage.getItem('bigold_ext_id')||'';
-
+  const extId = EXTENSION_ID || localStorage.getItem('bigold_ext_id') || '';
   const payload = {
     type: 'START_SEND',
     assetName: asset.name,
@@ -1184,17 +1182,14 @@ function trySendViaExtension(asset, clients, list){
     imageData: asset.chart || null,
     clients: clients.map(c=>({name:c.name, phone:c.phone}))
   };
-
   if(extId){
-    // Send to installed extension
     try{
       chrome.runtime.sendMessage(extId, payload, (res)=>{
         if(chrome.runtime.lastError || !res || !res.ok){
-          console.warn('Extension not reachable, using agent modal');
+          console.warn('Extensión no disponible, usando agente manual');
           openAgentModal(asset, list);
         } else {
-          showNotif(`🚀 Enviando a ${clients.length} clientes — abre WhatsApp Web`);
-          // Open WA Web so extension can work
+          showNotif(`🚀 Enviando a ${clients.length} clientes — revisa WhatsApp Web`);
           window.open('https://web.whatsapp.com','_blank');
         }
       });
@@ -1202,10 +1197,7 @@ function trySendViaExtension(asset, clients, list){
       openAgentModal(asset, list);
     }
   } else {
-    // No extension ID set — check if extension available via storage
-    chrome.storage && chrome.storage.local
-      ? openExtSetup(payload)
-      : openAgentModal(asset, list);
+    openAgentModal(asset, list);
   }
 }
 
@@ -1221,9 +1213,8 @@ function openAgentModal(asset, list){
 }
 
 function openExtSetup(payload){
-  // Store payload and show setup prompt
   localStorage.setItem('bigold_pending_send', JSON.stringify(payload));
-  const id = prompt('Ingresa el ID de la extensión BIG OLD:\n(lo encuentras en chrome://extensions después de instalarla)');
+  const id = prompt('Ingresa el ID de la extensión BIG OLD:\n(en Chrome ve a chrome://extensions y cópialo de la tarjeta "BIG OLD · Envío Masivo WA")');
   if(id && id.trim()){
     localStorage.setItem('bigold_ext_id', id.trim());
     trySendViaExtension(agentAsset, agentClients, LISTS.find(l=>l.id===sendingListId));
@@ -1231,6 +1222,11 @@ function openExtSetup(payload){
     openAgentModal(agentAsset, LISTS.find(l=>l.id===sendingListId));
   }
 }
+
+// URL del dashboard en producción
+const DASHBOARD_URL = 'https://vicho-silva.github.io/proyecto-cartera-/';
+// ID de la extensión BIG OLD instalada en Chrome
+const EXTENSION_ID = 'niiffokalkoafooakkikccglakbkagda';
 
 function renderAgentClient(){
   const c=agentClients[agentIdx];
