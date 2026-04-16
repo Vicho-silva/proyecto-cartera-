@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trading Dashboard · BIG OLD</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0f14; --bg2:#13161e; --bg3:#191d28; --bg4:#1f2433;
+  --border:#252a38; --border2:#2e3448;
+  --text:#e8ecf4; --muted:#7a8399; --muted2:#4a5268;
+  --accent:#3b82f6; --accent2:#2563eb; --accent-glow:rgba(59,130,246,0.15);
+  --gold:#f59e0b; --gold-bg:rgba(245,158,11,0.08); --gold-border:rgba(245,158,11,0.25);
+  --green:#22c55e; --green-bg:rgba(34,197,94,0.08); --green-border:rgba(34,197,94,0.25);
+  --red:#ef4444; --red-bg:rgba(239,68,68,0.08); --red-border:rgba(239,68,68,0.25);
+  --amber:#f59e0b; --amber-bg:rgba(245,158,11,0.08); --amber-border:rgba(245,158,11,0.25);
+  --blue:#3b82f6; --blue-bg:rgba(59,130,246,0.08); --blue-border:rgba(59,130,246,0.25);
+  --mono:'IBM Plex Mono',monospace; --sans:'Inter',sans-serif;
+  --r:10px; --r-sm:6px; --r-lg:14px;
+  --shadow:0 1px 3px rgba(0,0,0,0.3); --shadow-md:0 4px 20px rgba(0,0,0,0.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:14px;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.ticker-wrap{background:var(--bg2);border-bottom:1px solid var(--border);overflow:hidden;}
+.ticker-track{display:flex;animation:tickerScroll 40s linear infinite;width:max-content;}
+.ticker-track:hover{animation-play-state:paused;}
+@keyframes tickerScroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ti{display:flex;align-items:center;gap:6px;padding:7px 20px;border-right:1px solid var(--border);white-space:nowrap;}
+.tn{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.tp{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);}
+.tc{font-size:10px;font-weight:600;}
+.up{color:var(--green);}.dn{color:var(--red);}
+nav{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:100;}
+.logo{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.15em;display:flex;align-items:center;gap:8px;}
+.logo-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,197,94,.4);}50%{opacity:.7;box-shadow:0 0 0 4px rgba(34,197,94,0);}}
+.nav-center{display:flex;gap:3px;background:var(--bg3);padding:3px;border-radius:8px;border:1px solid var(--border);}
+.nav-tab{padding:5px 16px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--muted);transition:all .15s;font-family:var(--sans);}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{background:var(--accent);color:#fff;font-weight:600;}
+.nav-date{font-family:var(--mono);font-size:10px;color:var(--muted);}
+main{max-width:1160px;margin:0 auto;padding:1.5rem;}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.sec-title{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;}
+.sec-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.context-banner{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.5rem;}
+.cb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;}
+.cb-title{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.15em;}
+.cb-date{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.cb-items{display:flex;flex-wrap:wrap;gap:6px;}
+.cb-tag{font-size:11px;padding:3px 10px;border-radius:4px;background:var(--bg3);border:1px solid var(--border2);color:var(--muted);display:flex;align-items:center;gap:5px;}
+.cb-tag span{font-weight:600;color:var(--text);}
+.cal-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:1.75rem;}
+.cal-toolbar{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);background:var(--bg3);gap:.75rem;flex-wrap:wrap;}
+.cal-toolbar-left{display:flex;align-items:center;gap:10px;}
+.cal-toolbar-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.cal-live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0;}
+.cal-live-dot.loading{background:var(--amber);animation:spin 1s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);border-radius:50%;}}
+.cal-title{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);}
+.cal-updated{font-size:11px;color:var(--muted);}
+.auto-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.countdown{font-family:var(--mono);font-size:10px;color:var(--muted);padding:3px 8px;border-radius:4px;background:var(--bg4);border:1px solid var(--border);}
+.btn-refresh{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text);transition:all .15s;font-family:var(--sans);}
+.btn-refresh:hover{border-color:var(--accent);color:var(--accent);}
+.btn-refresh.spinning .ref-icon{display:inline-block;animation:spin-btn 0.7s linear infinite;}
+@keyframes spin-btn{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.sel-toolbar{display:none;align-items:center;justify-content:space-between;padding:.65rem 1.25rem;background:var(--blue-bg);border-bottom:1px solid var(--blue-border);flex-wrap:wrap;gap:.5rem;}
+.sel-toolbar.show{display:flex;}
+.sel-count{font-size:13px;font-weight:600;color:var(--blue);}
+.sel-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.cal-table-wrap{overflow-x:auto;}
+.cal-table{width:100%;border-collapse:collapse;}
+.cal-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg3);white-space:nowrap;}
+.cal-table th:first-child{width:36px;text-align:center;}
+.cal-table td{padding:9px 12px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.cal-table tr:last-child td{border-bottom:none;}
+.cal-table tr:hover td{background:var(--bg3);}
+.cal-table tr.row-past td{opacity:.55;}
+.cal-table tr.row-next{background:var(--amber-bg);}
+.cal-table tr.row-selected td{background:var(--blue-bg)!important;}
+.cal-cb{width:15px;height:15px;cursor:pointer;accent-color:var(--accent);}
+.cal-time{font-family:var(--mono);font-size:11px;color:var(--text);white-space:nowrap;}
+.cal-time.past{color:var(--muted2);}
+.cal-time.upcoming{color:var(--amber);font-weight:700;}
+.next-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);margin-left:4px;}
+.new-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);margin-left:4px;}
+.flag-cur{display:flex;align-items:center;gap:4px;}
+.cal-currency{font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;}
+.cur-usd{background:var(--blue-bg);color:var(--blue);}
+.cur-eur{background:rgba(139,92,246,.1);color:#a78bfa;}
+.cur-cny{background:var(--red-bg);color:var(--red);}
+.cur-clp{background:var(--gold-bg);color:var(--gold);}
+.cur-other{background:var(--bg4);color:var(--muted);}
+.cal-event{font-size:13px;font-weight:500;color:var(--text);}
+.cal-event.past{color:var(--muted);font-weight:400;}
+.imp-high{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);white-space:nowrap;}
+.imp-med{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);white-space:nowrap;}
+.cal-val{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;}
+.result-box{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-family:var(--mono);font-size:11px;font-weight:700;white-space:nowrap;}
+.result-beat{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.result-miss{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.result-inline{background:var(--bg4);color:var(--muted);border:1px solid var(--border);}
+.result-pending{font-size:11px;color:var(--muted2);font-family:var(--mono);}
+.cal-loading{padding:2.5rem;text-align:center;color:var(--muted);font-size:13px;}
+.cal-empty{padding:2rem;text-align:center;color:var(--muted);font-size:13px;}
+.cal-footer{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.25rem;border-top:1px solid var(--border);background:var(--bg3);flex-wrap:wrap;gap:.5rem;}
+.cal-footer-left{font-size:12px;color:var(--muted);}
+.cal-footer-right{display:flex;gap:7px;flex-wrap:wrap;}
+.btn{padding:6px 14px;border-radius:var(--r-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text);transition:all .15s;font-family:var(--sans);white-space:nowrap;}
+.btn:hover{background:var(--bg4);}
+.btn:active{transform:scale(.97);}
+.btn-acc{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;}
+.btn-acc:hover{background:var(--accent2);}
+.btn-green{background:var(--green-bg);color:var(--green);border-color:var(--green-border);}
+.btn-green:hover{background:rgba(34,197,94,.15);}
+.btn-sm{padding:5px 11px;font-size:11px;}
+.btn-ok{color:var(--green);border-color:var(--green-border);background:var(--green-bg);}
+.btn-ai{background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;font-weight:600;}
+.btn-ai:hover{opacity:.9;}
+.filters{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;}
+.fbtn{padding:5px 13px;border-radius:var(--r-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--muted);transition:all .15s;font-family:var(--sans);}
+.fbtn:hover{border-color:var(--accent);color:var(--text);}
+.fbtn.active{background:var(--bg4);color:var(--text);border-color:var(--border2);}
+.fbtn.fb.active{background:var(--green-bg);color:var(--green);border-color:var(--green-border);}
+.fbtn.fd.active{background:var(--red-bg);color:var(--red);border-color:var(--red-border);}
+.fbtn.fl.active{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);}
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;margin-bottom:1.5rem;}
+.acard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:.9rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.acard::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.acard.bull::after{background:var(--green);}
+.acard.bear::after{background:var(--red);}
+.acard.lat::after{background:var(--amber);}
+.acard:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.acard.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow);}
+.aicon{font-size:20px;margin-bottom:8px;}
+.aname{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.aprice{font-size:11px;color:var(--muted);margin-bottom:8px;}
+.pill{display:inline-flex;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;}
+.pill-bull{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.pill-bear{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.pill-lat{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;display:none;margin-bottom:1.5rem;box-shadow:var(--shadow-md);}
+.panel.show{display:block;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.panel-top{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg3);}
+.panel-title{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+.panel-top-right{display:flex;align-items:center;gap:7px;}
+.edit-btn{padding:4px 12px;border-radius:var(--r-sm);font-size:11px;border:1px solid var(--border2);background:var(--bg2);color:var(--muted);cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.edit-btn:hover{border-color:var(--accent);color:var(--accent);}
+.panel-close{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--muted);cursor:pointer;width:26px;height:26px;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.panel-close:hover{border-color:var(--red-border);color:var(--red);}
+.panel-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+@media(max-width:680px){.panel-body{grid-template-columns:1fr;}}
+.pcol{padding:1.25rem 1.5rem;}
+.pcol+.pcol{border-left:1px solid var(--border);}
+.col-lbl{font-size:9px;font-weight:700;color:var(--muted2);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;}
+.levels{display:flex;flex-direction:column;gap:4px;margin-bottom:1rem;}
+.lvl{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:var(--r-sm);padding:6px 10px;border-left:2px solid transparent;}
+.lvl.r{border-left-color:var(--red);}
+.lvl.s{border-left-color:var(--green);}
+.lvl-lbl{font-size:10px;color:var(--muted);}
+.lvl-val{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);}
+.key-box{background:var(--gold-bg);border-radius:var(--r-sm);padding:10px 12px;border-left:2px solid var(--gold);font-size:12px;color:var(--text);line-height:1.55;}
+.key-lbl{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;}
+.wa-box{background:#0d1117;border-radius:var(--r);padding:1rem;border:1px solid rgba(37,211,102,.15);}
+.wa-hdr{display:flex;align-items:center;gap:7px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:8px;}
+.wa-dot{width:7px;height:7px;border-radius:50%;background:#25d366;}
+.wa-lbl{font-size:9px;color:#25d366;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
+.wa-msg{background:#1a2530;border-radius:7px;padding:10px 12px;font-size:11.5px;color:#e9edef;line-height:1.7;white-space:pre-wrap;min-height:80px;max-height:280px;overflow-y:auto;}
+.wa-time{font-size:10px;color:#4a5568;text-align:right;margin-top:6px;}
+.ai-section{background:linear-gradient(135deg,rgba(59,130,246,.05),rgba(139,92,246,.05));border:1px solid rgba(59,130,246,.2);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:.75rem;}
+.ai-label{font-size:9px;font-weight:700;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px;}
+.ai-loading{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
+.ai-dots{display:flex;gap:3px;}
+.ai-dots span{width:4px;height:4px;border-radius:50%;background:var(--accent);animation:aiDot 1.2s ease infinite;}
+.ai-dots span:nth-child(2){animation-delay:.2s;}
+.ai-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes aiDot{0%,80%,100%{transform:scale(.5);opacity:.4;}40%{transform:scale(1);opacity:1;}}
+.panel-actions{padding:.85rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:7px;flex-wrap:wrap;background:var(--bg3);}
+.ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(139,92,246,.15));color:#a78bfa;border:1px solid rgba(139,92,246,.3);}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;}
+.overlay.show{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem;width:90%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+.modal-title{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;}
+.fi{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:8px 11px;color:var(--text);font-size:12px;font-family:var(--sans);outline:none;width:100%;transition:border-color .15s;}
+.fi:focus{border-color:var(--accent);}
+.fi::placeholder{color:var(--muted2);}
+.fi-lbl{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px;}
+.fi-group{margin-bottom:10px;}
+.fi-select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:8px 11px;color:var(--text);font-size:12px;font-family:var(--sans);outline:none;width:100%;cursor:pointer;}
+.fi-select option{background:var(--bg3);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.modal-divider{border:none;border-top:1px solid var(--border);margin:1rem 0;}
+.modal-actions{display:flex;gap:8px;margin-top:1.25rem;}
+.levels-edit{display:flex;flex-direction:column;gap:6px;}
+.level-input-row{display:flex;align-items:center;gap:6px;}
+.level-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ldot-r{background:var(--red);}
+.ldot-g{background:var(--green);}
+.add-level-btn{font-size:11px;color:var(--muted);background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--r-sm);padding:5px 10px;cursor:pointer;font-family:var(--sans);margin-top:4px;transition:all .15s;}
+.add-level-btn:hover{color:var(--accent);border-color:var(--accent);}
+.del-level-btn{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;padding:2px 5px;}
+.del-level-btn:hover{color:var(--red);}
+.clients-layout{display:grid;grid-template-columns:220px 1fr;gap:1.25rem;align-items:start;}
+@media(max-width:640px){.clients-layout{grid-template-columns:1fr;}}
+.lists-sidebar{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;}
+.sidebar-hdr{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-bottom:1px solid var(--border);background:var(--bg3);}
+.list-item{display:flex;align-items:center;gap:10px;padding:.75rem 1rem;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s;}
+.list-item:last-child{border-bottom:none;}
+.list-item:hover{background:var(--bg3);}
+.list-item.active{background:var(--blue-bg);}
+.list-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.list-name{font-size:13px;font-weight:500;color:var(--text);flex:1;}
+.list-cnt{font-size:10px;color:var(--muted);font-family:var(--mono);}
+.clients-main{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;}
+.clients-toolbar{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;border-bottom:1px solid var(--border);background:var(--bg3);flex-wrap:wrap;gap:.5rem;}
+.clients-list-name{font-size:14px;font-weight:600;color:var(--text);}
+.clients-list-count{font-size:11px;color:var(--muted);}
+.add-client-form{padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:var(--bg3);}
+.clients-table{width:100%;border-collapse:collapse;}
+.clients-table th{font-size:9px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.12em;padding:8px 14px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg3);}
+.clients-table td{padding:10px 14px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.clients-table tr:last-child td{border-bottom:none;}
+.clients-table tr:hover td{background:var(--bg3);}
+.client-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+.client-name{font-weight:500;color:var(--text);}
+.client-email,.client-phone{font-size:10px;color:var(--muted);}
+.no-list-selected,.clients-empty{padding:3rem;text-align:center;color:var(--muted);font-size:13px;}
+.send-panel{border-top:1px solid var(--border);padding:1.25rem;}
+.send-panel-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;}
+.send-asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px;}
+.send-asset-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:.65rem .85rem;cursor:pointer;text-align:left;transition:all .15s;font-family:var(--sans);}
+.send-asset-btn:hover{border-color:var(--accent);}
+.sab-icon{font-size:15px;margin-bottom:4px;}
+.sab-name{font-size:10px;font-weight:700;color:var(--text);margin-bottom:2px;font-family:var(--mono);}
+.send-client-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:var(--r-sm);padding:8px 12px;}
+.scr-left{display:flex;align-items:center;gap:9px;}
+.scr-name{font-size:12px;font-weight:500;color:var(--text);}
+.scr-phone{font-size:10px;color:var(--muted);font-family:var(--mono);}
+.wa-open-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--r-sm);background:var(--green-bg);border:1px solid var(--green-border);color:var(--green);font-size:10px;font-weight:600;text-decoration:none;}
+.color-opt{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.color-opt:hover{transform:scale(1.15);}
+.color-opt.active{border-color:var(--text);}
+.notif{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 18px;border-radius:var(--r);font-size:12px;font-weight:600;z-index:999;transform:translateY(80px);opacity:0;transition:all .25s;pointer-events:none;box-shadow:var(--shadow-md);}
+.notif.show{transform:translateY(0);opacity:1;}
+
+/* CHART IMAGE */
+.chart-upload-zone{border:2px dashed var(--border2);border-radius:var(--r);padding:1.25rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);position:relative;}
+.chart-upload-zone:hover{border-color:var(--accent);background:var(--bg4);}
+.chart-upload-zone.has-image{border-style:solid;border-color:var(--green-border);padding:0;overflow:hidden;}
+.chart-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.chart-img{width:100%;max-height:220px;object-fit:contain;display:block;border-radius:var(--r);background:#000;}
+.chart-img-actions{display:flex;gap:6px;padding:.5rem;background:var(--bg3);border-top:1px solid var(--border);}
+.chart-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;}
+.chart-placeholder-icon{font-size:28px;}
+.chart-placeholder-txt{font-size:11px;color:var(--muted);font-weight:500;}
+.chart-placeholder-sub{font-size:10px;color:var(--muted2);}
+.step-badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700;flex-shrink:0;}
+.step1{background:rgba(59,130,246,.2);color:var(--blue);}
+.step2{background:rgba(34,197,94,.2);color:var(--green);}
+.send-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;}
+.send-step{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;}
+.send-step-txt{font-size:12px;color:var(--text);}
+.send-step-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="ticker-wrap"><div class="ticker-track" id="ticker"></div></div>
+
+<nav>
+  <div class="logo"><div class="logo-dot"></div>OPORTUNIDADES · BIG OLD</div>
+  <div class="nav-center">
+    <button class="nav-tab active" id="tab-mercados" onclick="switchView('mercados')">📊 Mercados</button>
+    <button class="nav-tab" id="tab-clientes" onclick="switchView('clientes')">👥 Clientes</button>
+  </div>
+  <div class="nav-date" id="nav-date"></div>
+</nav>
+
+<main>
+<div id="view-mercados">
+
+  <div class="context-banner">
+    <div class="cb-header">
+      <div class="cb-title">⚡ CONTEXTO MACRO — ABRIL 2026</div>
+      <div class="cb-date" id="ctx-date"></div>
+    </div>
+    <div class="cb-items">
+      <div class="cb-tag">🇺🇸 Aranceles EE.UU. <span>pausa 90 días activa</span></div>
+      <div class="cb-tag">🕊️ Cese al fuego Medio Oriente <span>parcial, sin firma</span></div>
+      <div class="cb-tag">💵 DXY <span>presionado a la baja</span></div>
+      <div class="cb-tag">🏛️ Fed <span>recortes en el horizonte</span></div>
+      <div class="cb-tag">🇨🇳 China <span>reactivación industrial</span></div>
+      <div class="cb-tag">₿ ETFs BTC <span>flujos positivos</span></div>
+    </div>
+  </div>
+
+  <div class="sec-hdr">
+    <div>
+      <div class="sec-title">Calendario económico</div>
+      <div class="sec-sub" id="cal-date-sub">USD · EUR · CNY · CLP — Solo alto impacto 🔴</div>
+    </div>
+  </div>
+
+  <div class="cal-card">
+    <div class="cal-toolbar">
+      <div class="cal-toolbar-left">
+        <div class="cal-live-dot" id="cal-dot"></div>
+        <div class="cal-title" id="cal-title-txt">Cargando...</div>
+        <span class="auto-badge" id="auto-badge">● Auto 5min</span>
+      </div>
+      <div class="cal-toolbar-right">
+        <span class="cal-updated" id="cal-updated"></span>
+        <span class="countdown" id="countdown" title="Próxima actualización automática"></span>
+        <button class="btn-refresh" id="refresh-btn" onclick="refreshCalendar()">
+          <span class="ref-icon">↻</span> Actualizar ahora
+        </button>
+      </div>
+    </div>
+    <div class="sel-toolbar" id="sel-toolbar">
+      <div class="sel-count" id="sel-count">0 eventos seleccionados</div>
+      <div class="sel-actions">
+        <button class="btn btn-sm btn-green" onclick="copySelected()">📋 Copiar seleccionadas</button>
+        <button class="btn btn-sm" onclick="clearSelection()">Deseleccionar todas</button>
+      </div>
+    </div>
+    <div class="cal-table-wrap">
+      <div id="cal-body"><div class="cal-loading">⏳ Obteniendo datos del calendario...</div></div>
+    </div>
+    <div class="cal-footer">
+      <div class="cal-footer-left" id="cal-footer-info">Selecciona eventos con el checkbox para copiarlos</div>
+      <div class="cal-footer-right">
+        <button class="btn btn-sm" onclick="selectAll()">☑ Seleccionar todas</button>
+        <button class="btn btn-sm btn-green" onclick="copyAllEvents()">📋 Copiar todas</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-hdr">
+    <div>
+      <div class="sec-title">Oportunidades del día</div>
+      <div class="sec-sub">Toca un activo · ✏️ editar · ✨ generar con IA</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="fbtn active" onclick="setFilter('all',this)">Todos</button>
+    <button class="fbtn fb" onclick="setFilter('bull',this)">🟢 Alcistas</button>
+    <button class="fbtn fd" onclick="setFilter('bear',this)">🔴 Bajistas</button>
+    <button class="fbtn fl" onclick="setFilter('lat',this)">🟡 Laterales</button>
+  </div>
+
+  <div class="asset-grid" id="asset-grid"></div>
+
+  <div class="panel" id="panel">
+    <div class="panel-top">
+      <div class="panel-title" id="p-title"></div>
+      <div class="panel-top-right">
+        <button class="edit-btn" onclick="openEdit()">✏️ Editar</button>
+        <button class="panel-close" onclick="closePanel()">✕</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="pcol">
+        <div class="col-lbl">Resistencias</div>
+        <div class="levels" id="p-res"></div>
+        <div class="col-lbl">Soportes</div>
+        <div class="levels" id="p-sup"></div>
+        <div class="col-lbl" style="margin-top:1rem;">Punto clave</div>
+        <div class="key-box"><div class="key-lbl">🔑 Clave</div><div id="p-key"></div></div>
+
+        <!-- GRÁFICO MT5 -->
+        <div class="col-lbl" style="margin-top:1rem;display:flex;align-items:center;justify-content:space-between;">
+          <span>Gráfico MT5</span>
+          <span id="chart-remove-btn" style="display:none;">
+            <button onclick="removeChart()" class="btn btn-sm" style="font-size:10px;color:var(--red);border-color:var(--red-border);padding:2px 8px;">✕ Quitar</button>
+          </span>
+        </div>
+        <div class="chart-upload-zone" id="chart-upload-zone" onclick="triggerChartUpload()">
+          <input type="file" id="chart-file-input" accept="image/*" onchange="handleChartUpload(event)" style="display:none"/>
+          <div class="chart-placeholder" id="chart-placeholder">
+            <div class="chart-placeholder-icon">📊</div>
+            <div class="chart-placeholder-txt">Haz clic para subir el gráfico</div>
+            <div class="chart-placeholder-sub">PNG, JPG desde MetaTrader 5</div>
+          </div>
+          <img id="chart-preview-img" class="chart-img" style="display:none;" alt="Gráfico"/>
+        </div>
+      </div>
+
+      <div class="pcol">
+        <div class="col-lbl" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span>Vista previa WhatsApp</span><span class="ai-badge">✨ IA</span>
+        </div>
+        <div id="ai-section" class="ai-section" style="display:none;">
+          <div class="ai-label">✨ Generando mensaje con IA...</div>
+          <div class="ai-loading"><div class="ai-dots"><span></span><span></span><span></span></div><span>Analizando contexto...</span></div>
+        </div>
+        <div class="wa-box">
+          <div class="wa-hdr"><div class="wa-dot"></div><div class="wa-lbl">WhatsApp · Grupo</div></div>
+          <div class="wa-msg" id="p-wa"></div>
+          <div class="wa-time" id="p-time"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-actions">
+      <button class="btn btn-ai" onclick="generateAIMessage()">✨ Regenerar con IA</button>
+      <button class="btn" id="copy-btn" onclick="copyMsg()">📋 Copiar texto</button>
+      <button class="btn btn-green" id="send-chart-btn" onclick="openSendFlow()" style="display:none;">📤 Enviar imagen + texto</button>
+      <button class="btn btn-acc" onclick="openWA()">WhatsApp ↗</button>
+      <button class="btn btn-green" onclick="openSendToList()">📤 Enviar a lista</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="view-clientes" style="display:none;">
+  <div class="clients-layout">
+    <div class="lists-sidebar">
+      <div class="sidebar-hdr">
+        <div class="sec-title">Listas</div>
+        <button class="btn btn-sm btn-acc" onclick="openNewList()">+ Nueva</button>
+      </div>
+      <div id="lists-nav"></div>
+    </div>
+    <div class="clients-main">
+      <div class="clients-toolbar">
+        <div>
+          <div class="clients-list-name" id="clients-list-name">Selecciona una lista</div>
+          <div class="clients-list-count" id="clients-list-count"></div>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button class="btn btn-sm" onclick="openAddClient()">+ Agregar cliente</button>
+          <button class="btn btn-sm" style="color:var(--red);border-color:var(--red-border);" onclick="confirmDeleteList()">🗑 Eliminar</button>
+        </div>
+      </div>
+      <div class="add-client-form" id="add-client-form" style="display:none;">
+        <div class="form-row">
+          <div class="fi-group"><div class="fi-lbl">Nombre</div><input class="fi" id="c-name" placeholder="Juan Pérez"/></div>
+          <div class="fi-group"><div class="fi-lbl">Teléfono WhatsApp</div><input class="fi" id="c-phone" placeholder="+56912345678"/></div>
+        </div>
+        <div class="fi-group"><div class="fi-lbl">Correo</div><input class="fi" id="c-email" placeholder="juan@email.com"/></div>
+        <div style="display:flex;gap:7px;margin-top:8px;">
+          <button class="btn btn-sm btn-acc" onclick="saveClient()">Guardar</button>
+          <button class="btn btn-sm" onclick="closeAddClient()">Cancelar</button>
+        </div>
+      </div>
+      <div id="clients-table-wrap"><div class="no-list-selected">Selecciona una lista para ver sus clientes</div></div>
+      <div class="send-panel" id="send-panel" style="display:none;">
+        <div class="send-panel-title">📤 Enviar oportunidad a esta lista</div>
+        <div class="send-asset-grid" id="send-asset-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- SEND FLOW MODAL: imagen + texto -->
+<div class="overlay" id="sendflow-overlay">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-title">
+      <span id="sendflow-title">📤 Enviar gráfico + análisis</span>
+      <button class="panel-close" onclick="document.getElementById('sendflow-overlay').classList.remove('show')">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:1rem;">Sigue estos dos pasos en orden para enviar por WhatsApp:</div>
+
+    <div class="send-steps">
+      <div class="send-step">
+        <div class="step-badge step1">1</div>
+        <div>
+          <div class="send-step-txt">📸 Enviar el gráfico (imagen)</div>
+          <div class="send-step-sub">Se abrirá WhatsApp con la imagen lista para enviar</div>
+        </div>
+      </div>
+      <div class="send-step">
+        <div class="step-badge step2">2</div>
+        <div>
+          <div class="send-step-txt">📋 Copiar y pegar el análisis (texto)</div>
+          <div class="send-step-sub">Copia el mensaje y pégalo como segundo mensaje en WhatsApp</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista previa imagen -->
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;">Vista previa del gráfico</div>
+      <img id="sendflow-img" style="width:100%;border-radius:var(--r-sm);max-height:180px;object-fit:contain;background:#000;" alt="Gráfico"/>
+    </div>
+
+    <!-- Vista previa texto -->
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;">Vista previa del análisis</div>
+      <div class="wa-box" style="max-height:120px;overflow-y:auto;">
+        <div class="wa-msg" id="sendflow-txt" style="min-height:40px;"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-direction:column;">
+      <button class="btn btn-acc" onclick="sendflowStep1()" style="width:100%;justify-content:center;display:flex;align-items:center;gap:8px;">
+        <span>1️⃣</span> Abrir WhatsApp con la imagen ↗
+      </button>
+      <button class="btn btn-green" onclick="sendflowStep2()" id="sendflow-copy-btn" style="width:100%;justify-content:center;display:flex;align-items:center;gap:8px;">
+        <span>2️⃣</span> Copiar texto del análisis
+      </button>
+    </div>
+    <div style="font-size:10px;color:var(--muted2);text-align:center;margin-top:.75rem;">
+      💡 En WhatsApp: pega la imagen → envía → pega el texto → envía
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- MODALES -->
+<div class="overlay" id="list-overlay">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-title"><span>Nueva lista</span><button class="panel-close" onclick="closeNewList()">✕</button></div>
+    <div class="fi-group"><div class="fi-lbl">Nombre</div><input class="fi" id="list-name-input" placeholder="Ej: ACTIVOS BIG OLD"/></div>
+    <div class="fi-group"><div class="fi-lbl">Color</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;" id="color-picker">
+        <div class="color-opt active" style="background:#3b82f6;" data-color="#3b82f6" onclick="pickColor(this)"></div>
+        <div class="color-opt" style="background:#22c55e;" data-color="#22c55e" onclick="pickColor(this)"></div>
+        <div class="color-opt" style="background:#ef4444;" data-color="#ef4444" onclick="pickColor(this)"></div>
+        <div class="color-opt" style="background:#f59e0b;" data-color="#f59e0b" onclick="pickColor(this)"></div>
+        <div class="color-opt" style="background:#8b5cf6;" data-color="#8b5cf6" onclick="pickColor(this)"></div>
+        <div class="color-opt" style="background:#06b6d4;" data-color="#06b6d4" onclick="pickColor(this)"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-acc" onclick="saveList()" style="flex:1;">Crear lista</button>
+      <button class="btn" onclick="closeNewList()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="send-overlay">
+  <div class="modal" style="max-width:560px;padding:0;overflow:hidden;">
+
+    <!-- HEADER -->
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text);" id="agent-title">📤 Agente de Envío</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;" id="agent-sub"></div>
+      </div>
+      <button class="panel-close" onclick="closeSendModal()">✕</button>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div style="padding:.75rem 1.5rem;background:var(--bg3);border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:11px;color:var(--muted);">Progreso</span>
+        <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);" id="agent-progress-txt">0 / 0</span>
+      </div>
+      <div style="background:var(--bg4);border-radius:999px;height:6px;overflow:hidden;">
+        <div id="agent-progress-bar" style="background:var(--green);height:100%;border-radius:999px;transition:width .4s ease;width:0%;"></div>
+      </div>
+    </div>
+
+    <!-- CURRENT CLIENT CARD -->
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
+      <div style="font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.75rem;">Cliente actual</div>
+      <div style="display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:1rem;">
+        <div id="agent-avatar" style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;background:var(--accent);"></div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:600;color:var(--text);" id="agent-name">—</div>
+          <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:2px;" id="agent-phone">—</div>
+        </div>
+        <div id="agent-done-badge" style="display:none;font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);">✓ Enviado</div>
+      </div>
+    </div>
+
+    <!-- STEPS -->
+    <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);">
+      <div style="font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.75rem;">Pasos para este cliente</div>
+
+      <!-- Step 1: imagen -->
+      <div id="agent-step1-wrap" style="display:flex;gap:10px;align-items:flex-start;margin-bottom:.75rem;">
+        <div style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:rgba(59,130,246,.2);color:var(--blue);" id="agent-s1-badge">1</div>
+        <div style="flex:1;">
+          <button id="agent-btn-img" onclick="agentSendImage()" class="btn btn-acc" style="width:100%;justify-content:center;display:flex;align-items:center;gap:8px;font-size:13px;padding:10px;">
+            📸 Abrir WhatsApp y enviar imagen
+          </button>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;" id="agent-img-hint">Descarga la imagen → adjúntala en WhatsApp → envía</div>
+        </div>
+      </div>
+
+      <!-- Step 2: texto -->
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:rgba(34,197,94,.2);color:var(--green);">2</div>
+        <div style="flex:1;">
+          <button id="agent-btn-txt" onclick="agentCopyText()" class="btn btn-green" style="width:100%;justify-content:center;display:flex;align-items:center;gap:8px;font-size:13px;padding:10px;">
+            📋 Copiar texto del análisis
+          </button>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">Pégalo en WhatsApp como segundo mensaje</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NO CHART WARNING -->
+    <div id="agent-no-chart" style="display:none;padding:.75rem 1.5rem;background:var(--amber-bg);border-bottom:1px solid var(--amber-border);">
+      <span style="font-size:11px;color:var(--amber);">⚠️ Este activo no tiene gráfico — solo se enviará el texto del análisis</span>
+    </div>
+
+    <!-- NAVIGATION -->
+    <div style="padding:1rem 1.5rem;display:flex;gap:8px;align-items:center;background:var(--bg3);">
+      <button class="btn btn-sm" onclick="agentPrev()" id="agent-prev-btn" style="opacity:.5;">← Anterior</button>
+      <div style="flex:1;text-align:center;font-size:11px;color:var(--muted);" id="agent-nav-txt"></div>
+      <button class="btn btn-acc" onclick="agentNext()" id="agent-next-btn">Siguiente →</button>
+    </div>
+
+    <!-- COMPLETED STATE -->
+    <div id="agent-complete" style="display:none;padding:2rem 1.5rem;text-align:center;border-top:1px solid var(--border);">
+      <div style="font-size:36px;margin-bottom:.75rem;">🎉</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:.5rem;">¡Lista completada!</div>
+      <div style="font-size:12px;color:var(--muted);" id="agent-complete-sub"></div>
+      <button class="btn btn-acc" onclick="closeSendModal()" style="margin-top:1rem;">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="edit-overlay">
+  <div class="modal">
+    <div class="modal-title"><span id="edit-modal-title">✏️ Editar activo</span><button class="panel-close" onclick="closeEdit()">✕</button></div>
+    <div class="form-row">
+      <div class="fi-group"><div class="fi-lbl">Precio actual</div><input class="fi" id="e-price" placeholder="98.05"/></div>
+      <div class="fi-group"><div class="fi-lbl">Temporalidad</div><input class="fi" id="e-tf" placeholder="Daily / H4 / H1"/></div>
+    </div>
+    <div class="fi-group"><div class="fi-lbl">Escenario</div>
+      <select class="fi-select" id="e-trend">
+        <option value="bull">🟢 Alcista</option>
+        <option value="bear">🔴 Bajista</option>
+        <option value="lat">🟡 Lateral</option>
+      </select>
+    </div>
+    <div class="fi-group"><div class="fi-lbl">Fundamento</div><textarea class="fi" id="e-fundamental" rows="3" placeholder="Explica el fundamento..."></textarea></div>
+    <div class="fi-group"><div class="fi-lbl">Técnico</div><textarea class="fi" id="e-tecnico" rows="3" placeholder="Patrón técnico y escenario..."></textarea></div>
+    <div class="fi-group"><div class="fi-lbl">Punto clave 🔑</div><input class="fi" id="e-key" placeholder="El nivel más importante hoy"/></div>
+    <hr class="modal-divider">
+    <div class="form-row">
+      <div class="fi-group">
+        <div class="fi-lbl">🔴 Resistencias</div>
+        <div class="levels-edit" id="edit-res"></div>
+        <button class="add-level-btn" onclick="addLevel('res')">+ Agregar resistencia</button>
+      </div>
+      <div class="fi-group">
+        <div class="fi-lbl">🟢 Soportes</div>
+        <div class="levels-edit" id="edit-sup"></div>
+        <button class="add-level-btn" onclick="addLevel('sup')">+ Agregar soporte</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-acc" onclick="saveEdit()" style="flex:1;">Guardar y actualizar</button>
+      <button class="btn" onclick="closeEdit()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ===== ASSETS =====
+let ASSETS=JSON.parse(localStorage.getItem('bigold_assets_v8')||'null')||[
+  {id:'usdx',icon:'💵',name:'USDX',tf:'Daily',price:'98.05',trend:'bear',tl:'Bajista',res:['98.48','99.14','100.20'],sup:['97.73','97.48','96.00'],fundamental:'El índice del dólar enfrenta presión bajista. La pausa de 90 días en aranceles Trump redujo la demanda de dólar como refugio. IPC de marzo por debajo de lo esperado abre la puerta a recortes Fed.',tecnico:'Tendencia bajista desde máximos de 105. Bajo la media de 200 períodos. Si pierde 97.73, podríamos ver presión bajista hacia 97.48 y 96.00. Para un posible rebote necesita recuperar 98.48.',key:'97.73 es el soporte crítico — su ruptura aceleraría la caída hacia zona 96.'},
+  {id:'usdclp',icon:'🇨🇱',name:'USD/CLP',tf:'H4',price:'884',trend:'bear',tl:'Bajista',res:['892','902','908'],sup:['880','874','865'],fundamental:'Peso chileno se fortalece: cobre en máximos históricos, dólar global débil por expectativas de recortes Fed, IPC Chile en línea con meta del Banco Central.',tecnico:'Medias móviles girando a la baja en H4. Rechazó resistencia de 902. Si pierde 880, podríamos ver extensión bajista hacia 874 y 865. Recuperación sobre 892 sería primera señal de reversión.',key:'Canal alcista ya perforado — mientras no recupere 892, la presión bajista continúa.'},
+  {id:'xauusd',icon:'🥇',name:'XAU/USD',tf:'H1',price:'4.816',trend:'bull',tl:'Alcista',res:['4.840','4.869','4.940'],sup:['4.784','4.750','4.676'],fundamental:'Oro en máximos históricos. Tres pilares: dólar débil global, expectativas de recortes Fed y demanda de bancos centrales emergentes en récord.',tecnico:'Estructura de mínimos crecientes intacta. Correcciones a zona $4.784-$4.800 son posibles zonas de entrada para continuación alcista. Si pierde $4.750, podría ver corrección hacia $4.676.',key:'Cada retroceso a $4.784 es una oportunidad — mientras no pierda mínimos crecientes, el sesgo es alcista.'},
+  {id:'cobre',icon:'🟤',name:'Cobre',tf:'Daily',price:'6.09',trend:'bull',tl:'Alcista',res:['6.11','6.18','6.30'],sup:['5.93','5.68','5.26'],fundamental:'Cobre en máximos históricos. Dólar débil, China reactivando industria y restricciones al ácido sulfúrico contraen oferta refinada.',tecnico:'Si cierra sobre $6.11, confirmaría ruptura con posible impulso hacia $6.18 y $6.30. Si rechaza en $6.11, podría ver corrección sana hacia $5.93.',key:'Cierre diario sobre $6.11 es la llave — confirmación abre paso a territorio histórico.'},
+  {id:'wti',icon:'🛢️',name:'WTI Crudo',tf:'H4',price:'91.82',trend:'lat',tl:'Lateral',res:['96.02','100.11','102.77'],sup:['88.00','85.00','82.50'],fundamental:'Cese al fuego parcial bajó el precio desde $102. Sin acuerdo firmado el riesgo permanece. Cada declaración de Trump o movimiento en Irán puede mover ±5% en horas.',tecnico:'Zona de indecisión entre $88 y $96. Si fracasan negociaciones, posible rebote hacia $100. Si hay acuerdo y Ormuz abre, caída fuerte hacia $85.',key:'Activo más reactivo a Trump e Irán — alta volatilidad, gestión de riesgo prioritaria.'},
+  {id:'sp500',icon:'📈',name:'S&P 500',tf:'Daily',price:'7.038',trend:'bull',tl:'Alcista',res:['7.100','7.200','7.350'],sup:['6.869','6.773','6.662'],fundamental:'Rompió canal bajista. IPC bajo + cese al fuego + resultados corporativos Q1 superando estimados. Narrativa de soft landing volviendo con fuerza.',tecnico:'Precio extendido sobre medias móviles. Corrección sana a $6.869 daría mejor entrada. Si supera $7.100 con volumen, podría impulsar hacia $7.200.',key:'Sesgo alcista confirmado — corrección a $6.869 mejoraría la entrada.'},
+  {id:'nq100',icon:'💻',name:'NQ100 / NDX',tf:'Daily',price:'19.850',trend:'bull',tl:'Alcista',res:['20.200','20.800','21.500'],sup:['19.400','18.900','18.200'],fundamental:'Nasdaq lidera la recuperación. NVIDIA con ganancias históricas, acuerdo EE.UU.-Taiwan reduce aranceles a semiconductores al 15%.',tecnico:'Estructura alcista intacta. Si rompe 20.200, próximo objetivo 20.800. Soporte clave en 19.400 — si lo pierde, corrección hacia 18.900.',key:'IA + acuerdo Taiwan + Fed dovish = viento de cola estructural para el Nasdaq.'},
+  {id:'btc',icon:'₿',name:'BTC / USD',tf:'Daily',price:'84.500',trend:'bull',tl:'Alcista',res:['86.500','90.000','95.000'],sup:['82.000','78.000','74.000'],fundamental:'Sube por debilidad del dólar, expectativas de recortes Fed y flujos positivos hacia ETFs de BTC. Actúa como oro digital en contexto de incertidumbre.',tecnico:'Sobre soporte clave $82.000 con mínimos crecientes. Si mantiene $82.000 y rompe $86.500, posible impulso hacia $90.000. Si pierde $82.000, corrección hacia $78.000.',key:'$82.000 como soporte — mientras lo sostenga, el sesgo es alcista hacia $90.000.'},
+  {id:'soxx',icon:'💾',name:'SOXX Semi',tf:'Daily',price:'401.86',trend:'bull',tl:'Alcista',res:['415','430','450'],sup:['385','370','350'],fundamental:'ETF de semiconductores lidera el rally tech. NVIDIA con ganancias históricas, acuerdo Taiwan baja aranceles al 15%, expansión de centros de datos para IA.',tecnico:'Precio extendido en máximos anuales. Corrección a $385 daría mejor entrada. Si supera $415, siguiente objetivo $430.',key:'IA + semiconductores lideran — corrección a $385 podría ser oportunidad de entrada.'},
+  {id:'ech',icon:'🏔️',name:'ECH Chile',tf:'Daily',price:'44.05',trend:'bull',tl:'Alcista',res:['45.50','47.00','47.85'],sup:['43.00','41.50','39.00'],fundamental:'ETF de Chile se beneficia de cobre en máximos, peso fortaleciéndose y mejora del clima inversor. Cobre representa ~50% de exportaciones chilenas.',tecnico:'Recuperando desde mínimos $29.15. Si cobre confirma ruptura de $6.11, ECH apuntaría a $47.85. Soporte importante en $43.00.',key:'ECH es el proxy de cobre y peso — si ambos suben, ECH amplifica el movimiento.'}
+];
+
+const TICKER_DATA=[
+  {n:'USDX',p:'98.05',c:'-0.22%',up:false},{n:'USD/CLP',p:'884',c:'-1.78',up:false},
+  {n:'XAU/USD',p:'4,816',c:'+0.60%',up:true},{n:'COBRE',p:'6.09',c:'+2.1%',up:true},
+  {n:'WTI',p:'91.82',c:'+0.58%',up:true},{n:'S&P 500',p:'7,038',c:'+0.80%',up:true},
+  {n:'NQ100',p:'19,850',c:'+1.2%',up:true},{n:'BTC',p:'84,500',c:'+1.8%',up:true},
+  {n:'SOXX',p:'401.86',c:'+2.3%',up:true},{n:'ECH',p:'44.05',c:'+0.82%',up:true}
+];
+
+// ===== STATE =====
+let active=null,currentFilter='all',editingId=null;
+let calEvents=[],selectedRows=new Set();
+let countdownInterval=null,secondsLeft=300,lastKnownActuals={};
+let selectedListId=null,newListColor='#3b82f6',currentWAMessage='';
+let sendingAssetId=null,sendingListId=null;
+let LISTS=JSON.parse(localStorage.getItem('bigold_lists_v2')||'[]');
+let CLIENTS=JSON.parse(localStorage.getItem('bigold_clients_v2')||'{}');
+
+// ===== INIT =====
+function init(){
+  const now=new Date();
+  document.getElementById('nav-date').textContent=now.toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).toUpperCase();
+  document.getElementById('ctx-date').textContent=now.toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+  document.getElementById('p-time').textContent=now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+  const t=TICKER_DATA.map(d=>`<div class="ti"><span class="tn">${d.n}</span><span class="tp">${d.p}</span><span class="tc ${d.up?'up':'dn'}">${d.up?'▲':'▼'} ${d.c}</span></div>`).join('');
+  document.getElementById('ticker').innerHTML=t+t;
+  renderGrid();
+  loadCalendar(false);
+  startAutoRefresh();
+  renderListsNav();
+}
+
+// ===== AUTO REFRESH =====
+let autoRefreshInterval=null;
+function startAutoRefresh(){
+  secondsLeft=300;
+  clearInterval(autoRefreshInterval);
+  clearInterval(countdownInterval);
+  updateCountdown();
+  countdownInterval=setInterval(()=>{
+    secondsLeft--;
+    if(secondsLeft<=0){ loadCalendar(true); secondsLeft=300; }
+    updateCountdown();
+  },1000);
+}
+function updateCountdown(){
+  const m=Math.floor(secondsLeft/60), s=secondsLeft%60;
+  document.getElementById('countdown').textContent=`Próxima: ${m}:${s.toString().padStart(2,'0')}`;
+}
+function refreshCalendar(){
+  const btn=document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  secondsLeft=300; updateCountdown();
+  loadCalendar(true).finally(()=>btn.classList.remove('spinning'));
+}
+
+// ===== LOAD CALENDAR =====
+async function loadCalendar(silent=false){
+  const dot=document.getElementById('cal-dot');
+  dot.classList.add('loading');
+  if(!silent){
+    document.getElementById('cal-body').innerHTML='<div class="cal-loading">⏳ Obteniendo datos del calendario...</div>';
+  }
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+  document.getElementById('cal-title-txt').textContent=`EVENTOS DE HOY — ${dateStr}`;
+
+  let allEvents=[];
+  const currencies=['USD','EUR','CNY'];
+  let apiOk=false;
+
+  for(const cur of currencies){
+    try{
+      const url=`https://www.jblanked.com/news/api/forex-factory/calendar/today/?currency=${cur}&impact=High`;
+      const res=await fetch(url,{signal:AbortSignal.timeout(8000)});
+      if(res.ok){
+        const data=await res.json();
+        if(Array.isArray(data)&&data.length>0){allEvents.push(...data);apiOk=true;}
+      }
+    }catch(e){}
+  }
+
+  if(!apiOk||allEvents.length===0){
+    renderFallback();
+    dot.classList.remove('loading');
+    return;
+  }
+
+  allEvents=allEvents.map(e=>({
+    ...e,
+    title: e.title||e.name||e.event||e.Name||e.Event||'',
+    actual: (e.actual||e.Actual||e.actual_value||e.actualValue||e.result||'').toString().trim(),
+    forecast: (e.forecast||e.Forecast||e.estimate||e.expected||'').toString().trim(),
+    previous: (e.previous||e.Previous||e.prev||e.prior||'').toString().trim(),
+    time: e.time||e.Time||e.date||'',
+    currency: e.currency||e.Currency||e.cur||e.country||'',
+    impact: e.impact||e.Impact||e.importance||'High',
+  }));
+
+  const seen=new Set();
+  allEvents=allEvents.filter(e=>{
+    const k=(e.title)+(e.time||'');
+    if(seen.has(k))return false; seen.add(k); return true;
+  });
+  allEvents.sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+
+  const newActuals=new Set();
+  allEvents.forEach(e=>{
+    const k=e.title||'';
+    const actual=e.actual||'';
+    if(actual&&actual!=='—'&&!lastKnownActuals[k]){newActuals.add(k);}
+    if(actual&&actual!=='—') lastKnownActuals[k]=actual;
+  });
+
+  calEvents=allEvents;
+  renderCalendar(allEvents, newActuals, silent);
+  dot.classList.remove('loading');
+
+  const timeStr=now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('cal-updated').textContent=`Actualizado ${timeStr}`;
+
+  const withData=allEvents.filter(e=>e.actual&&e.actual.trim()&&e.actual!=='—').length;
+  const total=allEvents.length;
+  document.getElementById('cal-footer-info').textContent=
+    `${total} eventos · ${withData} con dato publicado · ${total-withData} pendientes`;
+
+  if(silent&&newActuals.size>0){
+    showNotif(`📊 Nuevo dato: ${[...newActuals].slice(0,2).join(', ')}`);
+  }
+}
+
+// ===== RENDER CALENDAR =====
+function parseNum(str){
+  if(!str||str==='—'||str.trim()==='')return null;
+  return parseFloat(str.replace(/[^0-9.\-]/g,''));
+}
+function compareVals(actual,forecast,previous,name){
+  const lw=['jobless','unemployment','claims','desempleo','deficit','debt'];
+  const isLB=lw.some(w=>(name||'').toLowerCase().includes(w));
+  const a=parseNum(actual), f=parseNum(forecast)||parseNum(previous);
+  if(a===null||f===null)return 'neutral';
+  if(isLB) return a<f?'beat':a>f?'miss':'inline';
+  return a>f?'beat':a<f?'miss':'inline';
+}
+function resultHTML(actual,forecast,previous,name){
+  if(!actual||actual.trim()==='')return `<span class="result-pending">—</span>`;
+  const outcome=compareVals(actual,forecast,previous,name);
+  const cfg={
+    beat:{cls:'result-beat',arrow:'▲',label:'MEJOR'},
+    miss:{cls:'result-miss',arrow:'▼',label:'PEOR'},
+    inline:{cls:'result-inline',arrow:'=',label:'EN LÍNEA'},
+    neutral:{cls:'result-inline',arrow:'=',label:''}
+  }[outcome]||{cls:'result-inline',arrow:'',label:''};
+  return `<span class="result-box ${cfg.cls}"><span>${cfg.arrow}</span><strong>${actual}</strong><span style="font-size:9px;opacity:.8;">${cfg.label}</span></span>`;
+}
+function getCurClass(cur){const m={USD:'cur-usd',EUR:'cur-eur',CNY:'cur-cny',CNH:'cur-cny',CLP:'cur-clp'};return m[(cur||'').toUpperCase()]||'cur-other';}
+function getFlag(cur){const m={USD:'🇺🇸',EUR:'🇪🇺',CNY:'🇨🇳',CNH:'🇨🇳',CLP:'🇨🇱',GBP:'🇬🇧',JPY:'🇯🇵'};return m[(cur||'').toUpperCase()]||'';}
+function impHTML(impact){
+  const i=(impact||'').toLowerCase();
+  if(i.includes('high')||i==='3')return`<span class="imp-high">● ALTO</span>`;
+  if(i.includes('medium')||i==='2')return`<span class="imp-med">● MEDIO</span>`;
+  return'';
+}
+function renderCalendar(events, newActuals=new Set(), silent=false){
+  const now=new Date();
+  const etOffsetMs=(now.getTimezoneOffset()+240)*60000;
+  const nowET=new Date(now.getTime()-etOffsetMs);
+  const nowMin=nowET.getHours()*60+nowET.getMinutes();
+  let nextFound=false;
+
+  const rows=events.map((e,i)=>{
+    const name=e.title||e.name||e.event||'—';
+    const cur=e.currency||e.cur||'';
+    const impact=e.impact||e.importance||'';
+    const time=e.time||'—';
+    const actual=e.actual||'';
+    const forecast=e.forecast||'';
+    const previous=e.previous||'';
+    const tm=time.match(/(\d+):(\d+)/);
+    let isPast=false, isNext=false;
+    if(tm){
+      const evMin=parseInt(tm[1])*60+parseInt(tm[2]);
+      isPast=evMin<nowMin;
+      if(!isPast&&!nextFound){isNext=true;nextFound=true;}
+    }
+    const isNew=newActuals.has(name);
+    const rowClass=isPast?'row-past':isNext?'row-next':'';
+    const isChecked=selectedRows.has(i);
+    return `<tr class="${rowClass} ${isChecked?'row-selected':''}" id="row-${i}">
+      <td style="text-align:center;"><input type="checkbox" class="cal-cb" ${isChecked?'checked':''} onchange="toggleRow(${i},this.checked)"/></td>
+      <td><span class="cal-time ${isPast?'past':isNext?'upcoming':''}">${time} ET${isNext?`<span class="next-badge">Próximo</span>`:''}${isNew?`<span class="new-badge">NUEVO</span>`:''}</span></td>
+      <td><div class="flag-cur"><span>${getFlag(cur)}</span><span class="cal-currency ${getCurClass(cur)}">${cur}</span></div></td>
+      <td>${impHTML(impact)}</td>
+      <td><span class="cal-event ${isPast&&!actual?'past':''}">${name}</span></td>
+      <td><span class="cal-val">${forecast||'—'}</span></td>
+      <td><span class="cal-val">${previous||'—'}</span></td>
+      <td>${resultHTML(actual,forecast,previous,name)}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('cal-body').innerHTML=`
+    <div class="cal-table-wrap">
+    <table class="cal-table">
+      <thead><tr>
+        <th><input type="checkbox" class="cal-cb" id="cb-all" onchange="toggleAll(this.checked)" title="Seleccionar todas"/></th>
+        <th>Hora (ET)</th><th>País</th><th>Impacto</th><th>Evento</th>
+        <th>Estimado</th><th>Anterior</th><th>Resultado</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+  updateSelToolbar();
+}
+function renderFallback(){
+  const fallback=[
+    {time:'08:30',currency:'USD',impact:'High',title:'Solicitudes de desempleo',forecast:'220K',previous:'215K',actual:''},
+    {time:'08:30',currency:'USD',impact:'High',title:'IPC Core (mensual)',forecast:'0.3%',previous:'0.4%',actual:''},
+    {time:'09:30',currency:'EUR',impact:'High',title:'IPC Eurozona (anual)',forecast:'2.2%',previous:'2.3%',actual:''},
+    {time:'21:30',currency:'CNY',impact:'High',title:'PIB China T1 2026',forecast:'5.2%',previous:'5.4%',actual:''},
+    {time:'09:00',currency:'CLP',impact:'High',title:'IPC Chile (mensual)',forecast:'0.2%',previous:'0.1%',actual:''},
+  ];
+  calEvents=fallback;
+  renderCalendar(fallback,new Set(),false);
+  document.getElementById('cal-updated').textContent='Datos de ejemplo · API no disponible';
+  document.getElementById('cal-footer-info').textContent='Mostrando datos de ejemplo — intenta actualizar manualmente';
+}
+function toggleRow(idx,checked){
+  if(checked) selectedRows.add(idx); else selectedRows.delete(idx);
+  const row=document.getElementById('row-'+idx);
+  if(row) row.classList.toggle('row-selected',checked);
+  updateSelToolbar();
+}
+function toggleAll(checked){
+  selectedRows.clear();
+  if(checked) calEvents.forEach((_,i)=>selectedRows.add(i));
+  calEvents.forEach((_,i)=>{
+    const cb=document.querySelector(`#row-${i} .cal-cb`);
+    const row=document.getElementById('row-'+i);
+    if(cb) cb.checked=checked;
+    if(row) row.classList.toggle('row-selected',checked);
+  });
+  updateSelToolbar();
+}
+function selectAll(){ toggleAll(true); document.getElementById('cb-all').checked=true; }
+function clearSelection(){ toggleAll(false); document.getElementById('cb-all').checked=false; }
+function updateSelToolbar(){
+  const n=selectedRows.size;
+  document.getElementById('sel-toolbar').classList.toggle('show',n>0);
+  document.getElementById('sel-count').textContent=`${n} evento${n!==1?'s':''} seleccionado${n!==1?'s':''}`;
+}
+function buildEventWA(e){
+  const name=e.title||e.name||e.event||'';
+  const cur=e.currency||e.cur||'';
+  const impact=(e.impact||'').toLowerCase();
+  const flag=getFlag(cur);
+  const impLabel=impact.includes('high')?'🔴 ALTO':impact.includes('medium')?'🟡 MEDIO':'⚪';
+  let lines=[`${impLabel} ${flag} *${e.time} ET* — *${name}*`];
+  if(e.forecast||e.previous){
+    let row='';
+    if(e.forecast) row+=`Est: ${e.forecast}`;
+    if(e.previous) row+=(row?' | ':'')+`Ant: ${e.previous}`;
+    lines.push(`   ${row}`);
+  }
+  if(e.actual){
+    const outcome=compareVals(e.actual,e.forecast,e.previous,name);
+    const resLabel={beat:'✅ MEJOR DE LO ESPERADO',miss:'❌ PEOR DE LO ESPERADO',inline:'➡️ EN LÍNEA'}[outcome]||'';
+    lines.push(`   Real: *${e.actual}* ${resLabel}`);
+  }
+  return lines.join('\n');
+}
+function buildCalHeader(){
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  return `📅 *CALENDARIO ECONÓMICO*\n*${dateStr.toUpperCase()}*\nUSD · EUR · CNY · CLP — Alto y medio impacto\n`;
+}
+function copySelected(){
+  const items=[...selectedRows].sort((a,b)=>a-b).map(i=>calEvents[i]).filter(Boolean);
+  if(!items.length){showNotif('No hay eventos seleccionados');return;}
+  const txt=buildCalHeader()+'\n'+items.map(buildEventWA).join('\n\n')+'\n\n⚠️ Solo informativo. No constituye asesoría financiera.';
+  navigator.clipboard.writeText(txt).then(()=>showNotif(`${items.length} evento${items.length>1?'s':''} copiado${items.length>1?'s':''} ✓`));
+}
+function copyAllEvents(){
+  if(!calEvents.length){showNotif('Sin datos para copiar');return;}
+  const txt=buildCalHeader()+'\n'+calEvents.map(buildEventWA).join('\n\n')+'\n\n⚠️ Solo informativo. No constituye asesoría financiera.';
+  navigator.clipboard.writeText(txt).then(()=>showNotif(`${calEvents.length} eventos copiados ✓`));
+}
+
+// ===== ASSETS =====
+function buildWA(a){
+  const tm={bull:'📈 ALCISTA',bear:'📉 BAJISTA',lat:'↔️ LATERAL'};
+  const d=new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+  return`${a.icon} *${a.name} — ${a.tf.toUpperCase()}*
+📅 ${d}
+
+⚡ *Escenario: ${tm[a.trend]||a.tl.toUpperCase()}*
+
+📌 *Fundamento*
+${a.fundamental}
+
+📊 *Niveles técnicos*
+🔴 Resistencias: ${a.res.join(' / ')}
+🟢 Soportes: ${a.sup.join(' / ')}
+
+▶️ *Técnico*
+${a.tecnico}
+
+🔑 *Clave del día*
+${a.key}
+
+⚠️ _Solo informativo. No constituye asesoría financiera._`;
+}
+function saveAssets(){localStorage.setItem('bigold_assets_v8',JSON.stringify(ASSETS));}
+function renderGrid(){
+  const f=currentFilter==='all'?ASSETS:ASSETS.filter(a=>a.trend===currentFilter);
+  document.getElementById('asset-grid').innerHTML=f.map(a=>`
+    <div class="acard ${a.trend}${active?.id===a.id?' active':''}" onclick="selectAsset('${a.id}')">
+      <div class="aicon">${a.icon}</div>
+      <div class="aname">${a.name}</div>
+      <div class="aprice">${a.price} · ${a.tf}</div>
+      <span class="pill pill-${a.trend==='bull'?'bull':a.trend==='bear'?'bear':'lat'}">${a.tl}</span>
+    </div>`).join('');
+}
+function setFilter(t,btn){currentFilter=t;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderGrid();}
+function selectAsset(id){
+  active=ASSETS.find(a=>a.id===id);
+  document.querySelectorAll('.acard').forEach(c=>c.classList.remove('active'));
+  document.getElementById('p-title').innerHTML=`${active.icon}&nbsp;${active.name}<span style="font-size:10px;color:var(--muted);margin-left:8px">${active.tf}</span>`;
+  document.getElementById('p-res').innerHTML=active.res.map(r=>`<div class="lvl r"><span class="lvl-lbl">Resistencia</span><span class="lvl-val">${r}</span></div>`).join('');
+  document.getElementById('p-sup').innerHTML=active.sup.map(s=>`<div class="lvl s"><span class="lvl-lbl">Soporte</span><span class="lvl-val">${s}</span></div>`).join('');
+  document.getElementById('p-key').textContent=active.key;
+  currentWAMessage=buildWA(active);
+  document.getElementById('p-wa').textContent=currentWAMessage;
+  document.getElementById('copy-btn').textContent='📋 Copiar texto';
+  document.getElementById('copy-btn').classList.remove('btn-ok');
+  renderChartPreview(active.chart||null);
+  const panel=document.getElementById('panel');
+  panel.classList.add('show');
+  setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+  generateAIMessage();
+}
+function closePanel(){document.getElementById('panel').classList.remove('show');document.querySelectorAll('.acard').forEach(c=>c.classList.remove('active'));active=null;}
+function copyMsg(){if(!active)return;navigator.clipboard.writeText(currentWAMessage).then(()=>{const b=document.getElementById('copy-btn');b.textContent='✓ Copiado';b.classList.add('btn-ok');setTimeout(()=>{b.textContent='📋 Copiar';b.classList.remove('btn-ok');},2500);showNotif('Mensaje copiado ✓');});}
+function openWA(){if(!active)return;window.open(`https://wa.me/?text=${encodeURIComponent(currentWAMessage)}`,'_blank');}
+
+// ===== AI =====
+async function generateAIMessage(){
+  if(!active)return;
+  const aiSec=document.getElementById('ai-section');
+  aiSec.style.display='block';
+  const a=active;
+  const tl={bull:'alcista',bear:'bajista',lat:'lateral'}[a.trend]||'';
+  const d=new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const prompt=`Eres un analista financiero experto. Genera un mensaje profesional para WhatsApp sobre esta oportunidad de trading:
+- Usar lenguaje como "posible rebote alcista", "si rompe la resistencia podríamos ver un impulso", "si pierde el soporte podríamos ver presión bajista"
+- NO dar órdenes de compra o venta directas
+- Emojis apropiados, formato WhatsApp con *negritas*
+- Terminar con "⚠️ Solo informativo. No constituye asesoría financiera."
+
+ACTIVO: ${a.icon} ${a.name} | FECHA: ${d} | TEMPORALIDAD: ${a.tf} | PRECIO: ${a.price} | ESCENARIO: ${tl.toUpperCase()}
+RESISTENCIAS: ${a.res.join(', ')} | SOPORTES: ${a.sup.join(', ')}
+FUNDAMENTO: ${a.fundamental}
+TÉCNICO: ${a.tecnico}
+CLAVE: ${a.key}
+MACRO ABRIL 2026: Pausa aranceles Trump, cese al fuego parcial Medio Oriente, DXY bajo presión, Fed con expectativas de recortes, China reactivando, ETFs BTC con flujos positivos.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const text=data.content?.find(b=>b.type==='text')?.text||buildWA(a);
+    currentWAMessage=text;document.getElementById('p-wa').textContent=text;
+    aiSec.style.display='none';showNotif('✨ Mensaje generado con IA');
+  }catch(e){currentWAMessage=buildWA(a);document.getElementById('p-wa').textContent=currentWAMessage;aiSec.style.display='none';}
+}
+
+// ===== EDIT =====
+function openEdit(){
+  if(!active)return;editingId=active.id;const a=active;
+  document.getElementById('edit-modal-title').textContent=`✏️ ${a.icon} ${a.name}`;
+  document.getElementById('e-price').value=a.price;document.getElementById('e-tf').value=a.tf;
+  document.getElementById('e-trend').value=a.trend;document.getElementById('e-fundamental').value=a.fundamental||'';
+  document.getElementById('e-tecnico').value=a.tecnico||'';document.getElementById('e-key').value=a.key||'';
+  renderLI('res',a.res);renderLI('sup',a.sup);
+  document.getElementById('edit-overlay').classList.add('show');
+}
+function renderLI(type,levels){document.getElementById('edit-'+type).innerHTML=levels.map((l,i)=>`<div class="level-input-row"><div class="level-dot ${type==='res'?'ldot-r':'ldot-g'}"></div><input class="fi" value="${l}" id="lv-${type}-${i}" style="flex:1"/><button class="del-level-btn" onclick="removeLevel('${type}',${i})">×</button></div>`).join('');}
+function addLevel(type){const a=ASSETS.find(x=>x.id===editingId);if(!a)return;(type==='res'?a.res:a.sup).push('');renderLI(type,type==='res'?a.res:a.sup);}
+function removeLevel(type,idx){const a=ASSETS.find(x=>x.id===editingId);if(!a)return;(type==='res'?a.res:a.sup).splice(idx,1);renderLI(type,type==='res'?a.res:a.sup);}
+function getLV(type){const v=[];for(let i=0;i<20;i++){const el=document.getElementById(`lv-${type}-${i}`);if(el&&el.value.trim())v.push(el.value.trim());}return v;}
+function saveEdit(){
+  const a=ASSETS.find(x=>x.id===editingId);if(!a)return;
+  a.price=document.getElementById('e-price').value.trim()||a.price;
+  a.tf=document.getElementById('e-tf').value.trim()||a.tf;
+  a.trend=document.getElementById('e-trend').value;
+  a.tl={bull:'Alcista',bear:'Bajista',lat:'Lateral'}[a.trend];
+  a.fundamental=document.getElementById('e-fundamental').value.trim();
+  a.tecnico=document.getElementById('e-tecnico').value.trim();
+  a.key=document.getElementById('e-key').value.trim();
+  a.res=getLV('res');a.sup=getLV('sup');
+  saveAssets();active=a;renderGrid();selectAsset(a.id);closeEdit();showNotif(`${a.name} actualizado ✓`);
+}
+function closeEdit(){document.getElementById('edit-overlay').classList.remove('show');}
+document.getElementById('edit-overlay').addEventListener('click',function(e){if(e.target===this)closeEdit();});
+
+// ===== VIEWS =====
+function switchView(v){
+  document.getElementById('view-mercados').style.display=v==='mercados'?'block':'none';
+  document.getElementById('view-clientes').style.display=v==='clientes'?'block':'none';
+  document.getElementById('tab-mercados').classList.toggle('active',v==='mercados');
+  document.getElementById('tab-clientes').classList.toggle('active',v==='clientes');
+}
+
+// ===== LISTS & CLIENTS =====
+function saveLists(){localStorage.setItem('bigold_lists_v2',JSON.stringify(LISTS));}
+function saveClients(){localStorage.setItem('bigold_clients_v2',JSON.stringify(CLIENTS));}
+function renderListsNav(){
+  const el=document.getElementById('lists-nav');
+  if(!LISTS.length){el.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--muted);font-size:12px">Sin listas aún</div>';return;}
+  el.innerHTML=LISTS.map(l=>`<div class="list-item${l.id===selectedListId?' active':''}" onclick="selectList('${l.id}')"><div class="list-dot" style="background:${l.color}"></div><div class="list-name">${l.name}</div><div class="list-cnt">${(CLIENTS[l.id]||[]).length}</div></div>`).join('');
+}
+function selectList(id){
+  selectedListId=id;const list=LISTS.find(l=>l.id===id);
+  document.getElementById('clients-list-name').textContent=list.name;
+  renderListsNav();renderClientsTable();
+  document.getElementById('send-panel').style.display='block';renderSendAssetGrid();
+}
+function renderClientsTable(){
+  const clients=CLIENTS[selectedListId]||[];
+  const wrap=document.getElementById('clients-table-wrap');
+  if(!clients.length){wrap.innerHTML='<div class="clients-empty">Sin clientes en esta lista<br><small style="color:var(--muted2)">Usa el botón "+ Agregar cliente"</small></div>';return;}
+  const color=LISTS.find(l=>l.id===selectedListId)?.color||'#3b82f6';
+  wrap.innerHTML=`<table class="clients-table"><thead><tr><th>Cliente</th><th>Teléfono</th><th>Correo</th><th></th></tr></thead><tbody>${clients.map((c,i)=>`<tr><td><div style="display:flex;align-items:center;gap:10px"><div class="client-avatar" style="background:${color}">${c.name.charAt(0).toUpperCase()}</div><div><div class="client-name">${c.name}</div></div></div></td><td><div class="client-phone">${c.phone||'—'}</div></td><td><div class="client-email">${c.email||'—'}</div></td><td><button class="btn btn-sm" style="color:var(--red);border-color:var(--red-border);font-size:10px" onclick="deleteClient(${i})">✕</button></td></tr>`).join('')}</tbody></table>`;
+  document.getElementById('clients-list-count').textContent=`${clients.length} cliente${clients.length!==1?'s':''}`;
+}
+function openAddClient(){document.getElementById('add-client-form').style.display='block';}
+function closeAddClient(){document.getElementById('add-client-form').style.display='none';['c-name','c-phone','c-email'].forEach(id=>document.getElementById(id).value='');}
+function saveClient(){
+  if(!selectedListId){showNotif('Selecciona una lista');return;}
+  const name=document.getElementById('c-name').value.trim(),phone=document.getElementById('c-phone').value.trim(),email=document.getElementById('c-email').value.trim();
+  if(!name||!phone){showNotif('Nombre y teléfono requeridos');return;}
+  if(!CLIENTS[selectedListId])CLIENTS[selectedListId]=[];
+  CLIENTS[selectedListId].push({name,phone,email});saveClients();closeAddClient();renderClientsTable();renderListsNav();showNotif(`${name} agregado ✓`);
+}
+function deleteClient(idx){if(!CLIENTS[selectedListId])return;CLIENTS[selectedListId].splice(idx,1);saveClients();renderClientsTable();renderListsNav();}
+function confirmDeleteList(){
+  if(!selectedListId)return;const list=LISTS.find(l=>l.id===selectedListId);
+  if(!confirm(`¿Eliminar lista "${list?.name}"?`))return;
+  LISTS=LISTS.filter(l=>l.id!==selectedListId);delete CLIENTS[selectedListId];selectedListId=null;
+  saveLists();saveClients();renderListsNav();
+  document.getElementById('clients-list-name').textContent='Selecciona una lista';
+  document.getElementById('clients-table-wrap').innerHTML='<div class="no-list-selected">Selecciona una lista para ver sus clientes</div>';
+  document.getElementById('send-panel').style.display='none';
+}
+function openNewList(){document.getElementById('list-overlay').classList.add('show');}
+function closeNewList(){document.getElementById('list-overlay').classList.remove('show');document.getElementById('list-name-input').value='';}
+function pickColor(el){newListColor=el.dataset.color;document.querySelectorAll('.color-opt').forEach(o=>o.classList.remove('active'));el.classList.add('active');}
+function saveList(){
+  const name=document.getElementById('list-name-input').value.trim();
+  if(!name){showNotif('Escribe un nombre');return;}
+  const id='list_'+Date.now();LISTS.push({id,name,color:newListColor});saveLists();closeNewList();renderListsNav();showNotif(`Lista "${name}" creada ✓`);
+}
+function renderSendAssetGrid(){
+  document.getElementById('send-asset-grid').innerHTML=ASSETS.map(a=>`<div class="send-asset-btn" onclick="openSendModal('${a.id}')"><div class="sab-icon">${a.icon}</div><div class="sab-name">${a.name}</div><span class="pill pill-${a.trend==='bull'?'bull':a.trend==='bear'?'bear':'lat'}">${a.tl}</span></div>`).join('');
+}
+// ===== AGENTE DE ENVÍO =====
+let agentClients=[], agentIdx=0, agentAsset=null, agentListColor='#3b82f6';
+let agentStepsDone={img:false, txt:false};
+
+function openSendToList(){
+  if(!active)return;
+  if(!LISTS.length){showNotif('Crea una lista primero');return;}
+  if(LISTS.length===1){openSendModal(active.id,LISTS[0].id);return;}
+  switchView('clientes');showNotif('Selecciona una lista y toca el activo');
+}
+
+function openSendModal(assetId,listId){
+  const lid=listId||selectedListId;
+  if(!lid){showNotif('Selecciona una lista primero');return;}
+  sendingAssetId=assetId; sendingListId=lid;
+  agentAsset=ASSETS.find(a=>a.id===assetId);
+  const list=LISTS.find(l=>l.id===lid);
+  if(!agentAsset||!list)return;
+  agentClients=CLIENTS[lid]||[];
+  agentListColor=list.color||'#3b82f6';
+  if(!agentClients.length){showNotif('Esta lista no tiene clientes');return;}
+
+  // Try to use the Chrome extension first (1-click automatic)
+  if(typeof chrome!=='undefined' && chrome.runtime){
+    trySendViaExtension(agentAsset, agentClients, list);
+  } else {
+    // Fallback: open the manual agent modal
+    agentIdx=0;
+    document.getElementById('agent-title').textContent=`📤 Agente — ${agentAsset.icon} ${agentAsset.name}`;
+    document.getElementById('agent-sub').textContent=`Lista: ${list.name} · ${agentClients.length} cliente${agentClients.length!==1?'s':''}`;
+    document.getElementById('agent-no-chart').style.display=agentAsset.chart?'none':'flex';
+    document.getElementById('agent-step1-wrap').style.display=agentAsset.chart?'flex':'none';
+    renderAgentClient();
+    document.getElementById('agent-complete').style.display='none';
+    document.getElementById('send-overlay').classList.add('show');
+  }
+}
+
+function trySendViaExtension(asset, clients, list){
+  // Extension ID — user sets this after installing
+  const extId = localStorage.getItem('bigold_ext_id')||'';
+
+  const payload = {
+    type: 'START_SEND',
+    assetName: asset.name,
+    assetIcon: asset.icon,
+    text: currentWAMessage || buildWA(asset),
+    imageData: asset.chart || null,
+    clients: clients.map(c=>({name:c.name, phone:c.phone}))
+  };
+
+  if(extId){
+    // Send to installed extension
+    try{
+      chrome.runtime.sendMessage(extId, payload, (res)=>{
+        if(chrome.runtime.lastError || !res || !res.ok){
+          console.warn('Extension not reachable, using agent modal');
+          openAgentModal(asset, list);
+        } else {
+          showNotif(`🚀 Enviando a ${clients.length} clientes — abre WhatsApp Web`);
+          // Open WA Web so extension can work
+          window.open('https://web.whatsapp.com','_blank');
+        }
+      });
+    }catch(e){
+      openAgentModal(asset, list);
+    }
+  } else {
+    // No extension ID set — check if extension available via storage
+    chrome.storage && chrome.storage.local
+      ? openExtSetup(payload)
+      : openAgentModal(asset, list);
+  }
+}
+
+function openAgentModal(asset, list){
+  agentIdx=0;
+  document.getElementById('agent-title').textContent=`📤 Agente — ${asset.icon} ${asset.name}`;
+  document.getElementById('agent-sub').textContent=`Lista: ${list.name} · ${agentClients.length} cliente${agentClients.length!==1?'s':''}`;
+  document.getElementById('agent-no-chart').style.display=asset.chart?'none':'flex';
+  document.getElementById('agent-step1-wrap').style.display=asset.chart?'flex':'none';
+  renderAgentClient();
+  document.getElementById('agent-complete').style.display='none';
+  document.getElementById('send-overlay').classList.add('show');
+}
+
+function openExtSetup(payload){
+  // Store payload and show setup prompt
+  localStorage.setItem('bigold_pending_send', JSON.stringify(payload));
+  const id = prompt('Ingresa el ID de la extensión BIG OLD:\n(lo encuentras en chrome://extensions después de instalarla)');
+  if(id && id.trim()){
+    localStorage.setItem('bigold_ext_id', id.trim());
+    trySendViaExtension(agentAsset, agentClients, LISTS.find(l=>l.id===sendingListId));
+  } else {
+    openAgentModal(agentAsset, LISTS.find(l=>l.id===sendingListId));
+  }
+}
+
+function renderAgentClient(){
+  const c=agentClients[agentIdx];
+  if(!c)return;
+  agentStepsDone={img:false,txt:false};
+  // Avatar
+  const av=document.getElementById('agent-avatar');
+  av.style.background=agentListColor;
+  av.textContent=c.name.charAt(0).toUpperCase();
+  document.getElementById('agent-name').textContent=c.name;
+  document.getElementById('agent-phone').textContent=c.phone||'—';
+  document.getElementById('agent-done-badge').style.display='none';
+  // Reset buttons
+  const btnImg=document.getElementById('agent-btn-img');
+  const btnTxt=document.getElementById('agent-btn-txt');
+  if(btnImg){btnImg.textContent='📸 Abrir WhatsApp y enviar imagen';btnImg.style.opacity='1';}
+  btnTxt.textContent='📋 Copiar texto del análisis';btnTxt.style.opacity='1';
+  // Progress
+  const pct=Math.round((agentIdx/agentClients.length)*100);
+  document.getElementById('agent-progress-bar').style.width=pct+'%';
+  document.getElementById('agent-progress-txt').textContent=`${agentIdx} / ${agentClients.length}`;
+  document.getElementById('agent-nav-txt').textContent=`Cliente ${agentIdx+1} de ${agentClients.length}`;
+  // Prev/next buttons
+  document.getElementById('agent-prev-btn').style.opacity=agentIdx===0?'.3':'1';
+  document.getElementById('agent-prev-btn').disabled=agentIdx===0;
+  document.getElementById('agent-next-btn').textContent=agentIdx===agentClients.length-1?'Finalizar ✓':'Siguiente →';
+}
+
+function agentSendImage(){
+  if(!agentAsset||!agentAsset.chart)return;
+  const c=agentClients[agentIdx];
+  // Download image
+  const link=document.createElement('a');
+  link.href=agentAsset.chart;
+  link.download=`${agentAsset.name}_grafico.png`;
+  link.click();
+  // Open WhatsApp Web for this client
+  setTimeout(()=>{
+    const phone=c.phone.replace(/\D/g,'');
+    window.open(`https://web.whatsapp.com/send?phone=${phone}`,'_blank');
+  },400);
+  agentStepsDone.img=true;
+  const btn=document.getElementById('agent-btn-img');
+  btn.textContent='✅ Imagen descargada — adjúntala en WhatsApp';
+  btn.style.opacity='.6';
+  checkAgentStepsDone();
+}
+
+function agentCopyText(){
+  const msg=buildWA(agentAsset);
+  const c=agentClients[agentIdx];
+  // If no chart, open WA too
+  if(!agentAsset.chart){
+    const phone=c.phone.replace(/\D/g,'');
+    window.open(`https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`,'_blank');
+  }
+  navigator.clipboard.writeText(msg).then(()=>{
+    agentStepsDone.txt=true;
+    const btn=document.getElementById('agent-btn-txt');
+    btn.textContent='✅ Texto copiado — pégalo en WhatsApp';
+    btn.style.opacity='.6';
+    checkAgentStepsDone();
+    showNotif('Texto copiado ✓');
+  });
+}
+
+function checkAgentStepsDone(){
+  const hasChart=!!(agentAsset&&agentAsset.chart);
+  const done=hasChart?(agentStepsDone.img&&agentStepsDone.txt):agentStepsDone.txt;
+  if(done){
+    document.getElementById('agent-done-badge').style.display='block';
+  }
+}
+
+function agentNext(){
+  if(agentIdx>=agentClients.length-1){
+    // Completed
+    document.getElementById('agent-progress-bar').style.width='100%';
+    document.getElementById('agent-progress-txt').textContent=`${agentClients.length} / ${agentClients.length}`;
+    document.getElementById('agent-complete').style.display='block';
+    document.getElementById('agent-complete-sub').textContent=
+      `Se completó el envío a los ${agentClients.length} clientes de la lista.`;
+    return;
+  }
+  agentIdx++;
+  renderAgentClient();
+}
+
+function agentPrev(){
+  if(agentIdx<=0)return;
+  agentIdx--;
+  renderAgentClient();
+}
+
+function closeSendModal(){
+  document.getElementById('send-overlay').classList.remove('show');
+}
+
+function openAllWA(){} // legacy stub
+function copyMsgForList(){ // legacy stub
+  if(!agentAsset)return;
+  navigator.clipboard.writeText(buildWA(agentAsset)).then(()=>showNotif('Mensaje copiado ✓'));
+}
+
+function showNotif(msg){const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),2500);}
+
+// ===== CHART IMAGE =====
+function triggerChartUpload(){
+  document.getElementById('chart-file-input').click();
+}
+
+function handleChartUpload(event){
+  const file=event.target.files[0];
+  if(!file||!active)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const b64=e.target.result;
+    // Save to asset
+    active.chart=b64;
+    saveAssets();
+    renderChartPreview(b64);
+    showNotif('📊 Gráfico guardado ✓');
+  };
+  reader.readAsDataURL(file);
+  // Reset input so same file can be re-uploaded
+  event.target.value='';
+}
+
+function renderChartPreview(b64){
+  const zone=document.getElementById('chart-upload-zone');
+  const placeholder=document.getElementById('chart-placeholder');
+  const img=document.getElementById('chart-preview-img');
+  const removeBtn=document.getElementById('chart-remove-btn');
+  const sendBtn=document.getElementById('send-chart-btn');
+  if(b64){
+    placeholder.style.display='none';
+    img.src=b64;
+    img.style.display='block';
+    zone.classList.add('has-image');
+    removeBtn.style.display='block';
+    sendBtn.style.display='flex';
+  } else {
+    placeholder.style.display='flex';
+    img.src='';
+    img.style.display='none';
+    zone.classList.remove('has-image');
+    removeBtn.style.display='none';
+    sendBtn.style.display='none';
+  }
+}
+
+function removeChart(){
+  if(!active)return;
+  if(!confirm('¿Quitar el gráfico de este activo?'))return;
+  active.chart='';
+  saveAssets();
+  renderChartPreview(null);
+  showNotif('Gráfico eliminado');
+}
+
+function openSendFlow(){
+  if(!active||!active.chart)return;
+  document.getElementById('sendflow-title').textContent=`📤 ${active.icon} ${active.name} — Gráfico + Análisis`;
+  document.getElementById('sendflow-img').src=active.chart;
+  document.getElementById('sendflow-txt').textContent=currentWAMessage;
+  document.getElementById('sendflow-copy-btn').textContent='2️⃣ Copiar texto del análisis';
+  document.getElementById('sendflow-overlay').classList.add('show');
+}
+
+function sendflowStep1(){
+  if(!active||!active.chart)return;
+  // Download image so user can share it manually, OR open WA
+  // Best approach: download the image to clipboard/disk then open WA
+  // We'll download the image and open WA simultaneously
+  const link=document.createElement('a');
+  link.href=active.chart;
+  link.download=`${active.name}_grafico.png`;
+  link.click();
+  setTimeout(()=>{
+    window.open('https://web.whatsapp.com','_blank');
+  },500);
+  showNotif('📥 Imagen descargada — adjúntala en WhatsApp');
+}
+
+function sendflowStep2(){
+  navigator.clipboard.writeText(currentWAMessage).then(()=>{
+    const btn=document.getElementById('sendflow-copy-btn');
+    btn.textContent='✅ Texto copiado — pégalo en WhatsApp';
+    btn.classList.add('btn-ok');
+    setTimeout(()=>{
+      btn.textContent='2️⃣ Copiar texto del análisis';
+      btn.classList.remove('btn-ok');
+    },3000);
+    showNotif('Texto copiado ✓');
+  });
+}
+
+init();
+</script>
+</body>
+</html>
